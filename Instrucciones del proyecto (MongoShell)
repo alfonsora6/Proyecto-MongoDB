@@ -1,3 +1,6 @@
+--1. Debes seleccionar un fichero json que incluya todos los tipos de datos soportados en MongoDB.
+Seleccionamos el fichero (vehiculos.json). En este caso lo he generado mediante la página https://mockaroo.com/
+
 --2. Con la utilidad mongoimport introduce los documentos correspondientes a esa colección.
 
 mongoimport --db=proyecto_mongo --collection=vehiculos --file=ruta_fichero.json

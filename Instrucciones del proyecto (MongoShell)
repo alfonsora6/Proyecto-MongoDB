@@ -1,0 +1,161 @@
+--2. Con la utilidad mongoimport introduce los documentos correspondientes a esa colección.
+
+mongoimport --db=proyecto_mongo --collection=vehiculos --file=ruta_fichero.json
+
+
+--3. Insertar varios documentos utilizando los dos métodos de inserción de MongoDB
+
+-- Con insertOne:
+-- Realiza una insercion de un nuevo vehículo.
+
+db.vehiculos.insertOne({
+  "id": 57,
+  "NombrePropietario": "Edmée",
+  "ApellidoPropietario": "Lister",
+  "GeneroPropietario": "Male",
+  "Email_Fabricante": "xlister1i@elpais.com",
+  "Marca": "Subaru",
+  "Modelo": "Legacy",
+  "Año": 1996,
+  "Color": ["Blue"],
+  "Disponibilidad": false,
+  "CV": 93,
+  "metadata":{
+        "sourceName": "Subaru",
+        "sourceUrl" : "https://www.subaru.es/"
+      }
+  }
+)
+
+
+--Con insertMany:
+--Realiza la inserción varios vehículos.
+
+db.vehiculos.insertMany([
+  {
+  "id": 77,
+  "NombrePropietario": "Cloé",
+  "ApellidoPropietaroio": "Edmonds",
+  "GeneroPropietario": "Female",
+  "Email_Fabricante": "gedmonds24@nsw.gov.au",
+  "Marca": "Nissan",
+  "Modelo": "Maxima",
+  "Año": 2009,
+  "Color": ["Violet"],
+  "Disponibilidad": false,
+  "CV": 133,
+  "metadata":{
+        "sourceName": "Nissan",
+        "sourceUrl" : "https://www.nissan.es/"
+      }
+},
+{
+  "id": 96,
+  "NombrePropietario": "Léandre",
+  "ApellidoPropietaroio": "Grimster",
+  "GeneroPropietario": "Male",
+  "Email_Fabricante": "mgrimster2n@xing.com",
+  "Marca": "Mercedes-Benz",
+  "Modelo": "CLK-Class",
+  "Año": 2003,
+  "Color": ["Orange"],
+  "Disponibilidad": false,
+  "CV": 143,
+  "metadata":{
+        "sourceName": "Mercedes Benz",
+        "sourceUrl" : "https://www.mercedes-benz.es"
+      }
+}]
+)
+
+--4. Elimina varios documentos utilizando los dos métodos de eliminación de MongoDB.
+
+--Con deleteOne:
+--Elimina el vehículo con modelo "LX".
+
+db.vehiculos.deleteOne({"Modelo": "LX"})
+
+
+--Con deleteMany:
+--Elimina los vehículos de la marca "Suzuki".
+
+db.vehiculos.deleteMany({"Marca": "Suzuki"})
+
+
+--5. Actualiza varios documentos utilizando los tres métodos de eliminación de MongoDB.
+
+--Con updateOne
+--Actualiza el vehículo que cuente con 85 CV y cambia la disponibilidad a true.
+
+db.vehiculos.updateOne({"CV": 85},{$set:{"Disponibilidad": true}})
+
+
+--Con updateMany
+--Realiza una actualización en la que todos los vehículos pertenezcan del un año superior a 2010, tengan 120 CV. 
+
+db.vehiculos.updateMany({
+  Año: { $gt: 2010}
+},{
+  $set: {
+    "CV": 120
+  }
+})
+
+--Con replaceOne
+--Reemplaza el modelo por "CTS-V" en el vehículo que tenga "Cadillac" en el nombre de la fuente de sus metadatos.
+
+db.vehiculos.replaceOne({"metadata.sourceName":"Cadillac"},{"Modelo":"CTS-V"})
+
+
+-- 6. Consultas
+
+
+--CONCULTAS SIMPLES
+
+--Muestra los vehículos que están disponibles.
+db.vehiculos.find({"Disponibilidad": true}).pretty()
+
+--Muestra los vehículos de la marca “Nissan”.
+db.vehiculos.find({"Marca": "Nissan"}).pretty()
+
+--Muestra los vehículos con menos de 100 CV.
+db.vehiculos.find({"CV":{$lt:100}}).pretty()
+
+--Muestra el número de vehículos de la marca GMC.
+db.vehiculos.find({"Marca": "GMC"}).count()
+
+--Muestra vehiculos en los que los emails de fabricantes terminen por .com.
+db.vehiculos.find({"Email_Fabricante":/.com$/}).pretty()
+
+
+
+--CONSULTAS CON ARRAYS
+
+--Muestra todos los vehículos que tengan el color "Negro".
+db.vehiculos.find({"Color":{$in:["Negro"]}}).sort({"id":1}).pretty()
+
+--Muestra los vehículos que tengan exáctamente los colores "Blanco","Plata" y "Gris".
+db.vehiculos.find({"Color": ["Blanco","Plata","Gris"]}).pretty()
+
+--Muestra los vehículos que tenga los colores "Negro" y "Gris". Pueden tener adicionalmente más colores, pero esos 2 son obligatorios.
+db.vehiculos.find({"Color":{$all: ["Negro","Gris"]}}).pretty()
+
+
+
+-- CONSULTAS CON DOCUMENTOS EMBEBIDOS
+
+--Muestra el nombre de los propietarios de los vehículos que tienen “Wikipedia” en el nombre de la fuente de sus metadatos.
+db.vehiculos.find({"metadata.sourceName": "Wikipedia"},{"NombrePropietario":1}).pretty()
+
+--Muestra el modelo y disponibilidad de los vehículos de la marca "GMC".
+db.vehiculos.find({"Marca": "GMC"},{"Modelo":1,"Disponibilidad":1}).pretty()
+
+--Muestra la marca, modelo y CV de los vehículos de un año mayor a 2010.
+db.vehiculos.find({"Año": {$gt:2010}},{"Marca":1,"Modelo":1,"CV":1}).pretty()
+
+
+
+-- CONSULTAS DE AGRUPACIÓN
+
+--Agrupa cada modelo por marca, súmalos y devuelve cuantos modelos tiene cada marca.
+db.vehiculos.aggregate([{$group:{_id: "$Marca", "Nº de modelos":{$sum: 1}}}]).pretty()
